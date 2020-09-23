@@ -29,10 +29,8 @@ original [Annotorious](https://github.com/annotorious/annotorious). See the
   <script type="text/javascript" src="annotorious.min.js"></script>
 </body>
 ```
-Full documentation is [on the project website](https://recogito.github.io/annotorious/). Questions? Feedack? Feature requests? Join the 
-[Annotorious chat on Gitter](https://gitter.im/recogito/annotorious).
+Full documentation is [on the Main project website](https://recogito.github.io/annotorious/). This is my private customised version.
 
-[![Join the chat at https://gitter.im/recogito/annotorious](https://badges.gitter.im/recogito/annotorious.svg)](https://gitter.im/recogito/annotorious?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## License
 
