@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Annotorious | Basic Example</title>
+  <link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet">
+  <style>
+    html,
+    body {
+      padding: 20px;
+      margin: 0px;
+      font-family: 'Lato', sans-serif;
+    }
+
+    #content {
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 21px;
+      font-weight: normal;
+      margin: 0;
+      padding: 0;
+    }
+
+    p.instructions {
+      padding: 10px 0;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    p.caption {
+      font-family: Arial, Helvetica, sans-serif;
+      color: #8f8f8f;
+    }
+
+    p.caption annotation {
+      color: #3f3f3f;
+    }
+
+    .label-text {
+      font-size: x-small;
+      opacity: 1;
+    }
+
+    .a9s-annotation:hover~.label-text {
+      opacity: 1;
+      font-size: large;
+    }
+
+    .label-text:hover {
+      font-size: small;
+    }
+
+    .a9s-annotationlayer {
+      cursor: crosshair;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="content">
+    <h1>Annotorious: Basic Example Hell</h1>
+    <p class="instructions">
+      Click the annotation to edit. Click and drag the mouse to create annotation new annotation.
+    </p>
+    <p>
+      <button id="current-tool">RECTANGLE</button>
+      <button id="del-anno">Delete</button>
+    </p>
+    <p>
+      <button id="add-vocab">Add Vocab</button>
+    </p>
+    <div style="position: relative;">
+      <div id="delete-btn"
+        style="position: absolute; top: 0; left: 0; background-color: brown; width:15px; height: 15px; z-index: 2; display: none; ">
+        X</div>
+      <img id="hallstatt" src="640px-Hallstatt.jpg">
+    </div>
+
+    <p class="caption">
+      Sample image source: <annotation href="http://commons.wikimedia.org/wiki/File:Hallstatt_300.jpg">Hallstatt,
+        Austria</annotation>, by Nick Csakany/Wikimedia Commons. Public Domain.
+    </p>
+  </div>
+  </div>
+  <script>
+    (function () {
+      var boundRect = {};
+      var del;
+      var id;
+      var textDiv;
+      var selectedAnno;
+      var mouseEnterAnnotation;
+      var vocab = ['Building', 'Person', 'Vegetation', 'Waterbody', 'water'];
+      var anno = Annotorious.init({
+        image: 'hallstatt',
+        locale: 'auto',
+        tagVocabulary: vocab,
+        //labelList  = ['my_shit', 'hellBoy']
+      });
+
+      let svg = document.getElementsByClassName('a9s-annotationlayer');
+      svg[0].addEventListener('mousedown', function() {
+        console.log('mouse down BITCH');
+        if(selectedAnno){
+          anno.deSelect();
+        }
+        
+      })
+      
+      //EventTOConsider
+      anno.on('createSelection', function (selection) {
+        console.log('created selection', selection);
+        /*
+        setTimeout(function() {  
+          let listElem = document.getElementById('predef-labels'); 
+          console.log(listElem);
+          //Inject the option tags to datalist here
+          if(listElem) { // listElem.childNode == NULL
+            for(let i = 0; i < labels.length; i++){
+              let optionTag = document.createElement('option');
+              optionTag.setAttribute('value', labels[i]);
+              listElem.appendChild(optionTag);
+            }
+            
+          }
+
+        }, 100);
+        */
+
+
+
+      });
+
+      anno.on('changeSelectionTarget', function (target) {
+        console.log('selection changed', target);
+      });
+
+      anno.on('deselectAnnotation', function() { console.log( 'YIPEEEE '); });
+
+      anno.on('selectAnnotation', function (annotation) {
+        console.log('selected', annotation);
+        let parentG = document.querySelectorAll("[data-id=" + CSS.escape(annotation.id) + "]");
+        //console.log(parentG);
+        selectedAnno = annotation;
+
+
+        let el = anno.findAnnotationSVG(annotation);
+        //anno.parseRect(anno.findAnnotationShape(annotation));
+        //console.log(el.querySelector('.outer'));
+        let rect = document.getElementsByClassName('editable')[0].children[0];
+
+        console.log(rect);
+        //const outerRect = el.querySelector('.outer');
+
+        const x = parseFloat(rect.getAttribute('x'));
+        const y = parseFloat(rect.getAttribute('y'));
+        const w = parseFloat(rect.getAttribute('width'));
+        const h = parseFloat(rect.getAttribute('height'));
+
+
+        let del = document.getElementById('delete-btn');
+        del.style.display = "block";
+        del.style.top = y + 'px';
+        del.style.left = x + w - 20 + 'px';
+        console.log(del);
+
+
+
+
+      });
+
+      anno.on('createAnnotation', function (annotation) {
+        console.log('created', annotation.body);
+
+        let el = anno.findAnnotationSVG(annotation);
+        //anno.parseRect(anno.findAnnotationShape(annotation));
+        //console.log(el.querySelector('.outer'));
+        console.log(anno.getRectSize(anno.findAnnotationSVG(annotation)));
+        const outerRect = el.querySelector('.outer');
+
+        const x = parseFloat(outerRect.getAttribute('x'));
+        const y = parseFloat(outerRect.getAttribute('y'));
+        const w = parseFloat(outerRect.getAttribute('width'));
+        const h = parseFloat(outerRect.getAttribute('height'));
+
+        boundRect[annotation.id] = { x: x, y: y, w: w, h: h }
+
+        let parentG = document.querySelectorAll("[data-id=" + CSS.escape(annotation.id) + "]");
+        // console.log(parentG[0].children);
+
+        //let textElement = parentG[0].querySelectorAll('text');
+
+        let textElement = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+
+        textElement.setAttribute('class', 'label-text');
+
+        let X = boundRect[annotation.id].x
+        let Y = boundRect[annotation.id].y;
+        //console.log(X)
+        textElement.setAttribute('x', X + 5);
+        textElement.setAttribute('y', Y + 15);
+        textElement.setAttribute('font-size', '12');
+        textElement.setAttribute('fill', 'yellow');
+        textElement.id = annotation.id;
+        textElement.textContent = annotation.body[0].value;
+
+
+        textDiv = document.createElement('div');
+
+        textDiv.classList.add('Label');
+        textDiv.innerText = annotation.body[0].value;
+        textDiv.style.position = 'absolute';
+        textDiv.style.top = Y.toString() + 'px';
+        textDiv.style.left = X.toString() + 'px';
+        textDiv.style.color = 'yellow';
+        textDiv.id =  annotation.id;
+        textDiv.style.fontSize = '12px';
+        textDiv.style.zIndex = '2';
+
+        console.log(textDiv);
+
+
+        let svg = document.getElementsByClassName('a9s-annotationlayer');
+        //svg[0].appendChild(textElement);
+        //console.log(textElement);
+
+        let del = document.getElementsByClassName('delete-btn');
+       
+
+        let img = document.getElementById('hallstatt');
+        img.insertAdjacentElement('afterend', textDiv);
+
+
+        textDiv.addEventListener('click', function(){ 
+          //the corresponding annotation is available in the event handler
+          anno.selectAnnotation(annotation);
+          console.log(annotation.body[0].value);
+          //annotation.body[0].value = ''
+        })
+
+
+
+      });
+
+      anno.on('updateAnnotation', function (annotation, previous) {
+        console.log('updated', previous, 'with', annotation);
+
+        let el = anno.findAnnotationSVG(annotation);
+        //anno.parseRect(anno.findAnnotationShape(annotation));
+        //console.log(el.querySelector('.outer'));
+        console.log(anno.getRectSize(anno.findAnnotationSVG(annotation)));
+        const outerRect = el.querySelector('.outer');
+
+        const x = parseFloat(outerRect.getAttribute('x'));
+        const y = parseFloat(outerRect.getAttribute('y'));
+        const w = parseFloat(outerRect.getAttribute('width'));
+        const h = parseFloat(outerRect.getAttribute('height'));
+
+        boundRect[annotation.id] = { x: x, y: y, w: w, h: h }
+
+        let X = boundRect[annotation.id].x
+        let Y = boundRect[annotation.id].y;
+
+        textDiv = document.createElement('div');
+
+        textDiv.classList.add('Label');
+        textDiv.innerText = annotation.body[0].value;
+        textDiv.style.position = 'absolute';
+        textDiv.style.top = Y.toString() + 'px';
+        textDiv.style.left = X.toString() + 'px';
+        textDiv.style.color = 'yellow';
+        textDiv.id =  annotation.id;
+        textDiv.style.fontSize = '12px';
+        textDiv.style.zIndex = '2';
+
+        
+        let img = document.getElementById('hallstatt');
+        img.insertAdjacentElement('afterend', textDiv);
+
+
+        textDiv.addEventListener('click', function(){ 
+          //the corresponding annotation is available in the event handler
+          anno.selectAnnotation(annotation);
+          console.log(annotation.body[0].value);
+          //annotation.body[0].value = '';
+        })
+
+      });
+
+      anno.on('deleteAnnotation', function (annotation) {
+        console.log('delete EVENT', annotation);
+        document.getElementById(annotation.id).remove();
+      });
+
+      anno.on('mouseEnterAnnotation', function (annotation) {
+        console.log('enter', annotation);
+
+        mouseEnterAnnotation = annotation;
+        
+        let el = anno.findAnnotationSVG(annotation);
+
+        const outerRect = el.querySelector('.outer');
+
+        const x = parseFloat(outerRect.getAttribute('x'));
+        const y = parseFloat(outerRect.getAttribute('y'));
+        const w = parseFloat(outerRect.getAttribute('width'));
+        const h = parseFloat(outerRect.getAttribute('height'));
+
+
+        delB = document.getElementById('delete-btn')
+        delB.style.display = "block";
+
+        delB.style.top = y + 'px';
+        delB.style.left = x + w - 20 + 'px';
+        
+
+      });
+
+      anno.on('mouseLeaveAnnotation', function (annotation) {
+         console.log('leave', annotation);
+
+         //mouseEnterAnnotation = null;
+       
+        delB = document.getElementById('delete-btn')
+        delB.style.display = "none";;
+
+      });
+
+      anno.on('customEvent', function () { console.log('custom event from ****') })
+
+      anno.loadAnnotations('annotations.w3c.json');
+
+      anno.setDrawingTool('rect');
+
+      var toolToggle = document.getElementById('current-tool');
+      toolToggle.addEventListener('click', function () {
+        if (toolToggle.innerHTML == 'RECTANGLE') {
+          toolToggle.innerHTML = 'POLYGON';
+          anno.setDrawingTool('polygon');
+        } else {
+          toolToggle.innerHTML = 'RECTANGLE';
+          anno.setDrawingTool('rect');
+        }
+      });
+
+      let i = 0;
+      var vocabButton = document.getElementById('add-vocab');
+      vocabButton.addEventListener('click', function () {
+
+        vocab.push('label_' + i++);
+        console.log(vocab);
+      });
+
+      var delButton = document.getElementById('del-anno');
+      delButton.addEventListener('click', function () {
+        anno.deSelect();
+        //vocab.push('label_' + i++);
+        console.log('deleting');
+        anno.removeAnnotation(selectedAnno);
+        console.log('calling remove again...');
+        //anno.removeAnnotation(selectedAnno);
+
+        //let g = document.querySelector(`.a9s-annotation[data-id="` + CSS.escape(selectedAnno.id) + `"]`);
+      });
+
+      var delIcon = document.getElementById('delete-btn');
+      delIcon.addEventListener('click', function () {
+        anno.deSelect();
+        //vocab.push('label_' + i++);
+        console.log('deleting');
+
+        if(selectedAnno){
+          anno.removeAnnotation(selectedAnno);
+        }
+        if(mouseEnterAnnotation){
+          anno.removeAnnotation(mouseEnterAnnotation);
+        }
+       
+        console.log(this.style.display = "none");
+
+
+
+      });
+
+      delIcon.addEventListener('mouseenter', function() {
+        //vocab.push('label_' + i++);
+        console.log('hovering');
+        //anno.removeAnnotation(selectedAnno);
+        //console.log(this.style.display = "none");
+
+
+
+      });
+
+    })()
+  </script>
+</body>
+
+</html>
