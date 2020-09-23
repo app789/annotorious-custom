@@ -8,24 +8,7 @@ in Web pages with just a few lines of code. This project is a modernized reboot 
 original [Annotorious](https://github.com/annotorious/annotorious). See the 
 [project website](https://recogito.github.io/annotorious/) for details and live demos.
 
-<img width="620" src="https://raw.githubusercontent.com/recogito/annotorious/master/screenshot.jpg" />
 
-## Installing
-
-If you use npm, `npm install @recogito/annotorious` and 
-
-```javascript
-import { Annotorious } from '@recogito/annotorious';
-
-const anno = new Annotorious({ image: 'hallstatt' }); // image element or ID
-```
-
-Otherwise download the [latest release](https://github.com/recogito/annotorious/releases/latest)
-and include it in your web page.
-
-```html
-<script src="annotorious.min.js"></script>
-```
 
 ## Using
 
